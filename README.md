@@ -34,7 +34,7 @@ if (result.ok) {
 ## Install
 
 ```bash
-npm install decoder-ts
+npm install && npm run build
 ```
 
 Zero runtime dependencies. Ships ESM + CJS + `.d.ts`.

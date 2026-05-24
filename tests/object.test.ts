@@ -33,7 +33,7 @@ describe("object_decodes_shape", () => {
     }
   });
 
-  test("supports optional and nullable properties", "i => {
+  test("supports optional and nullable properties", () => {
     const d = object({
       name: string,
       nickname: optional(string),
@@ -48,10 +48,10 @@ describe("object_decodes_shape", () => {
   test("nests path through nested object errors", () => {
     const inner = object({ city: string });
     const outer = object({ addr: inner });
-    r = safeDecode(outer, { addr: { city: 42 } });
+    const r = safeDecode(outer, { addr: { city: 42 } });
     expect(r.ok).toBe(false);
     if (!r.ok) {
-      expect(r.error.path).toEqual(["ddcity"]);
+      expect(r.error.path).toEqual(["addr", "city"]);
     }
   });
 });

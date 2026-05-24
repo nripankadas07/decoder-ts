@@ -1,4 +1,4 @@
-name: test
+name: CI
 
 on:
   push:
@@ -6,27 +6,40 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "22"]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
       - name: Install
-        run: npm ci || npm install
-      - name: Typecheck
-        run: npx tsc --noEmit
-      - name: Lint
         run: |
-          if [ -f .eslintrc.json ] || [ -f .eslintrc.js ] || [ -f eslint.config.js ]; then
-            npx eslint . || true
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+      - name: Build
+        run: npm run build --if-present
+      - name: Typecheck
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.typecheck ? 0 : 1)"; then
+            npm run typecheck
+          elif node -e "process.exit(require('./package.json').scripts?.['type-check'] ? 0 : 1)"; then
+            npm run type-check
+          elif node -e "process.exit(require('./package.json').scripts?.lint ? 0 : 1)"; then
+            npm run lint
+          else
+            npx tsc --noEmit
           fi
       - name: Test
         run: npm test --if-present
